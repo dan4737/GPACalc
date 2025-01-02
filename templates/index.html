@@ -3,66 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPA Calculator</title>
+    <title>GPA Predictor</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>GPA Calculator</h1>
+        <h1>GPA Predictor</h1>
         <form action="/calculate" method="POST">
-            <div class="current-info">
-                <label for="current_gpa">Current GPA:</label>
-                <input type="number" step="0.01" name="current_gpa" placeholder="Current GPA" required>
-                <label for="current_credits">Total Credits Earned:</label>
-                <input type="number" step="1" name="current_credits" placeholder="Total Credits" required>
-            </div>
-            <div class="desired-info">
-                <label for="desired_gpa">Desired GPA:</label>
-                <input type="number" step="0.01" name="desired_gpa" placeholder="Desired GPA">
-            </div>
-            <div id="courses">
-                <div class="course">
-                    <input type="text" name="course_name" placeholder="Course (optional)">
-                    <input type="number" name="credits" placeholder="Credits" required>
-                    <input type="text" name="grade" placeholder="Grade" required>
-                </div>
-            </div>
-            <button type="button" onclick="addCourse()" class="add-course">+ Add More Courses</button>
-            <div class="actions">
-                <button type="submit" class="calculate">Calculate</button>
-                <button type="reset" class="clear">Clear</button>
-            </div>
+            <label for="course">Select Course:</label>
+            <select id="course" name="course" required>
+                {% for course, credits in courses.items() %}
+                <option value="{{ course }}" {% if course == selected_course %}selected{% endif %}>
+                    {{ course }} ({{ credits }} credits)
+                </option>
+                {% endfor %}
+            </select>
+
+            <label for="current_cgpa">Current CGPA:</label>
+            <input type="number" step="0.01" name="current_cgpa" placeholder="Current CGPA" value="{{ current_cgpa }}" required>
+
+            <label for="current_credits">Total Credits Completed:</label>
+            <input type="number" step="1" name="current_credits" placeholder="Total Credits" value="{{ current_credits }}" required>
+
+            <label for="desired_cgpa">Desired CGPA:</label>
+            <input type="number" step="0.01" name="desired_cgpa" placeholder="Desired CGPA" value="{{ desired_cgpa }}" required>
+
+            <button type="submit">Calculate</button>
         </form>
 
-        {% if semester_gpa is defined and cumulative_gpa is defined %}
-<div class="result">
-    <h2>Semester GPA: <span>{{ "%.2f"|format(semester_gpa) }}</span></h2>
-    <h2>Cumulative GPA: <span>{{ "%.2f"|format(cumulative_gpa) }}</span></h2>
-    {% if desired_gpa > 0 %}
-    <h2>Required GPA This Semester: <span>{{ "%.2f"|format(required_gpa) }}</span></h2>
-    {% endif %}
-    <h3>Courses:</h3>
-    <ul>
-        {% for course in courses %}
-        <li>{{ course.course_name }} - Grade: {{ course.grade }}, Credits: {{ course.credits }}</li>
-        {% endfor %}
-    </ul>
-</div>
-{% endif %}
+        {% if required_gpa_message is defined %}
+        <div class="result">
+            <h2>Result:</h2>
+            <p>{{ required_gpa_message }}</p>
+        </div>
+        {% endif %}
     </div>
-
-    <script>
-        function addCourse() {
-            const coursesDiv = document.getElementById('courses');
-            const newCourse = document.createElement('div');
-            newCourse.classList.add('course');
-            newCourse.innerHTML = `
-                <input type="text" name="course_name" placeholder="Course (optional)">
-                <input type="number" name="credits" placeholder="Credits" required>
-                <input type="text" name="grade" placeholder="Grade" required>
-            `;
-            coursesDiv.appendChild(newCourse);
-        }
-    </script>
 </body>
 </html>
